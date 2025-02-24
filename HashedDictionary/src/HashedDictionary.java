@@ -27,7 +27,6 @@ public class HashedDictionary<K, V> implements DictionaryInterface<K, V>
 	private static final double MAX_LOAD_FACTOR = 0.5; // Fraction of hash table that can be filled
 
 	public HashedDictionary()
-
 	{
 
 		this(DEFAULT_CAPACITY); // Call next constructor
