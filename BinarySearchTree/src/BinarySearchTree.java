@@ -67,7 +67,19 @@ public class BinarySearchTree<T extends Comparable<? super T>> extends BinaryTre
 
 //...
 	private BinaryNode<T> findLargest(BinaryNode<T> rootNode) {
-		//
+		if (rootNode.hasRightChild()) {
+			rootNode = findLargest(rootNode.getRightChild());
+		}
+		return rootNode;
+	}
+	private BinaryNode<T> removeLargest(BinaryNode<T> rootNode) {
+		if (rootNode.hasRightChild()) {
+			BinaryNode<T> rightChild = rootNode.getRightChild();
+			rightChild = removeLargest(rightChild);
+			rootNode.setRightChild(rightChild);
+		}
+		else
+			rootNode = rootNode.getLeftChild();
 		return rootNode;
 	}
 
@@ -126,34 +138,27 @@ public class BinarySearchTree<T extends Comparable<? super T>> extends BinaryTre
 		return result;		
 	}
 	private T addEntry(BinaryNode<T> rootNode, T newEntry) {
-		BinaryNode<T> currentNode = getRootNode();
-		assert currentNode != null;
+		assert rootNode != null;
 		T result = null;
-		boolean found = false;
+		int comparison = newEntry.compareTo(rootNode.getData());
 		
-		while (!found) {
-			T currentEntry = currentNode.getData();
-			int comparison = newEntry.compareTo(currentEntry);
+		if (comparison == 0) {
+			result = rootNode.getData();
+			rootNode.setData(newEntry);
+		}
+		else if (comparison < 0) {
+			if (rootNode.hasLeftChild())
+				result = addEntry(rootNode.getLeftChild(), newEntry);
+			else
+				rootNode.setLeftChild(new BinaryNode<>(newEntry));	
+		}
+		else {
+			assert comparison > 0;
 			
-			if (comparison == 0) {
-				found = true;
-				result = currentEntry;
-				currentNode.setData(newEntry);
-			}
-			else if (comparison < 0) {
-				if (rootNode.hasLeftChild())
-					result = addEntry(rootNode.getLeftChild(), newEntry);
-				else
-					rootNode.setLeftChild(new BinaryNode<>(newEntry));	
-			}
-			else {
-				assert comparison > 0;
-				
-				if (rootNode.hasRightChild())
-					result = addEntry(rootNode.getRightChild(), newEntry);
-				else 
-					rootNode.setRightChild(new BinaryNode<>(newEntry));
-			}
+			if (rootNode.hasRightChild())
+				result = addEntry(rootNode.getRightChild(), newEntry);
+			else 
+				rootNode.setRightChild(new BinaryNode<>(newEntry));
 		}
 		return result;
 	}
