@@ -29,6 +29,12 @@ public class HashedDictionaryOpenAddressingPerfectInstrumented<K,V> implements D
     private static final int MAX_SIZE = 2 * MAX_CAPACITY;
     private boolean initialized = false;
     
+    public static int totalProbes = 0;
+    
+    public static void resetTotalProbes() { totalProbes = 0; }
+	
+	public static int getTotalProbes() { return totalProbes; } 
+    
     
     // fraction of hash table that can be filled
     // In the original code this was static final, but we want to be able
@@ -134,7 +140,6 @@ public class HashedDictionaryOpenAddressingPerfectInstrumented<K,V> implements D
         return !foundFactor;
     } // end getNextPrime    
     
-    
     private int getHashIndex(K key){
         int val = key.toString().hashCode();
         val = Math.abs(val);
@@ -194,11 +199,19 @@ public class HashedDictionaryOpenAddressingPerfectInstrumented<K,V> implements D
         while ( !found && (hashTable[index] != null) )
         {
             if ( hashTable[index].isIn() &&
-                key.equals(hashTable[index].getKey()) )
+                key.equals(hashTable[index].getKey()) ) {
                     found = true; // key found
-            else // follow probe sequence
+                    totalProbes++;
+            }
+            else {// follow probe sequence
                 index = random.nextInt(hashTable.length);
+                totalProbes++;
+            }
+            
         } // end while
+        
+        if (hashTable[index] == null) 
+        	totalProbes++;
         
         // Assertion: Either key or  null is found at hashTable[index]
         int result = -1;
@@ -260,7 +273,8 @@ public class HashedDictionaryOpenAddressingPerfectInstrumented<K,V> implements D
                     found = true; // Key found
                 } else // Follow probe sequence
                 {
-                    index = random.nextInt(hashTable.length); // Linear probing
+                    index = random.nextInt(hashTable.length);
+                    totalProbes++;
                 }
             } else // Skip entries that were removed
             {
@@ -268,10 +282,13 @@ public class HashedDictionaryOpenAddressingPerfectInstrumented<K,V> implements D
                 if (removedStateIndex == -1) {
                     removedStateIndex = index;
                 }
-                index = random.nextInt(hashTable.length); // Linear probing
+                index = random.nextInt(hashTable.length);
+                totalProbes++;
             } // end if
         } // end while
         
+        if (hashTable[index] == null) 
+        	totalProbes++;
         
         // Assertion: Either key or null is found at hashTable[index]
         if (found || (removedStateIndex == -1) )
